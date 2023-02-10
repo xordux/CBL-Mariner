@@ -22,7 +22,7 @@ Version:   3.0.9
 ExclusiveArch: %{golang_arches} %{gccgo_arches}
 
 Name:      go-rpm-macros
-Release:   3%{?dist}
+Release:   4%{?dist}
 Summary:   Build-stage rpm automation for Go packages
 
 License:   GPLv3+
@@ -35,7 +35,7 @@ Requires:  go-srpm-macros = %{version}-%{release}
 Requires:  go-filesystem  = %{version}-%{release}
 
 %ifarch %{golang_arches}
-Requires:  golang
+Requires:  golang <= 1.18.8
 Provides:  compiler(golang)
 Provides:  compiler(go-compiler) = 2
 Obsoletes: go-compilers-golang-compiler < %{version}-%{release}
@@ -170,6 +170,9 @@ install -m 0644 -vp   rpm/macros.d/macros.go-compilers-gcc \
 %{_spectemplatedir}/*.spec
 
 %changelog
+* Fri Feb 10 2023 Andrew Phelps <anphel@microsoft.com> - 3.0.9-4
+- Restrict golang to <= 1.18.8
+
 * Tue Mar 01 2022 Pawel Winogrodzki <pawelwi@microsoft.com> - 3.0.9-3
 - Fixing Go's linker flags.
 - License verified.
