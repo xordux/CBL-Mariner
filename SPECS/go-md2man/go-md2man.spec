@@ -1,7 +1,7 @@
 Summary:        Converts markdown into roff (man pages)
 Name:           go-md2man
 Version:        2.0.1
-Release:        13%{?dist}
+Release:        14%{?dist}
 License:        MIT
 Vendor:         Microsoft Corporation
 Distribution:   Mariner
@@ -9,7 +9,7 @@ Group:          Tools/Container
 URL:            https://github.com/cpuguy83/go-md2man
 #Source0:       https://github.com/cpuguy83/go-md2man/archive/v2.0.1.tar.gz
 Source0:        go-md2man-%{version}.tar.gz
-BuildRequires:  golang
+BuildRequires:  golang <= 1.18.8
 BuildRequires:  which
 # required packages on install
 Requires:       /bin/sh
@@ -48,6 +48,9 @@ cp go-md2man-%{version}/LICENSE.md %{buildroot}%{_docdir}/%{name}-%{version}/LIC
 %{_bindir}/go-md2man
 
 %changelog
+* Fri Feb 10 2023 Andrew Phelps <anphel@microsoft.com> - 2.0.1-14
+- Force building with golang 1.18.8
+
 * Fri Feb 03 2023 CBL-Mariner Servicing Account <cblmargh@microsoft.com> - 2.0.1-13
 - Bump release to rebuild with go 1.19.5
 
