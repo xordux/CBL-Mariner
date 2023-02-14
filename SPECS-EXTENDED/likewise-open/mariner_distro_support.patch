@@ -1,0 +1,178 @@
+--- domainjoin/libdomainjoin/include/djdistroinfo.h	2018-12-12 17:37:19.000000000 -0800
++++ domainjoin/libdomainjoin/include/djdistroinfo.h.1	2021-02-08 23:32:58.000000000 -0800
+@@ -12,7 +12,7 @@
+  * your option) any later version.
+  *
+  * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
+  * General Public License for more details.  You should have received a copy
+  * of the GNU Lesser General Public License along with this program.  If
+@@ -63,6 +63,7 @@
+     DISTRO_DEBIAN,
+     DISTRO_FREEBSD,
+     DISTRO_ESX,
++    DISTRO_MARINER,
+     DISTRO_VMWARE_PHOTON,
+ } DistroType;
+ 
+--- domainjoin/libdomainjoin/src/djdaemonmgr_systemd.c	2018-12-12 17:37:19.000000000 -0800
++++ domainjoin/libdomainjoin/src/djdaemonmgr_systemd.c.1	2021-02-08 23:30:08.837167269 -0800
+@@ -52,7 +52,7 @@
+ 
+     LW_CLEANUP_CTERR(&exc, DJGetDistroInfo("", &distro));
+ 
+-    if (distro.distro == DISTRO_VMWARE_PHOTON)
++    if (distro.distro == DISTRO_VMWARE_PHOTON || distro.distro == DISTRO_MARINER)
+     {
+         bSupported = TRUE;
+     }
+@@ -328,4 +328,3 @@
+ 
+     CT_SAFE_FREE_STRING(pszPath);
+ }
+-
+--- domainjoin/libdomainjoin/src/djdistroinfo.c	2018-12-12 17:37:19.000000000 -0800
++++ domainjoin/libdomainjoin/src/djdistroinfo.c.1	2021-02-08 23:33:48.000000000 -0800
+@@ -12,7 +12,7 @@
+  * your option) any later version.
+  *
+  * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
+  * General Public License for more details.  You should have received a copy
+  * of the GNU Lesser General Public License along with this program.  If
+@@ -129,13 +129,13 @@
+                 1
+             },
+             {
+-                DISTRO_VMWARE_PHOTON,
+-                "/etc/photon-release",
++                DISTRO_MARINER,
++                "/etc/mariner-release",
+                 /*
+                 # The format of the line is something like:
+-                #   VMware Photon Linux 1.0 (x86_64)
++                #   CBL-Mariner 1.0(x86_64)
+                 */
+-                "^[[:space:]]*VMware Photon Linux ([[:digit:]]+(\\.[[:digit:]]+)?)"
++                "^[[:space:]]*CBL-Mariner ([[:digit:]]+(\\.[[:digit:]]+)?)"
+                 "( \\(\\S+\\))?",
+                 1,
+                 -1,
+@@ -146,7 +146,7 @@
+                 "/etc/photon-release",
+                 /*
+                 # The format of the line is something like:
+-                #   VMware Photon OS 1.0 (x86_64)
++                #   VMWare Photon OS 3.0(x86_64)
+                 */
+                 "^[[:space:]]*VMware Photon OS ([[:digit:]]+(\\.[[:digit:]]+)?)"
+                 "( \\(\\S+\\))?",
+@@ -539,7 +539,7 @@
+ {
+     OSType value;
+     const char *name;
+-} static const osList[] = 
++} static const osList[] =
+ {
+     { OS_AIX, "AIX" },
+     { OS_SUNOS, "SunOS" },
+@@ -577,7 +577,7 @@
+ {
+     DistroType value;
+     const char *name;
+-} static const distroList[] = 
++} static const distroList[] =
+ {
+     { DISTRO_AIX, "AIX" },
+     { DISTRO_SUNOS, "Solaris" },
+@@ -596,6 +596,8 @@
+     { DISTRO_DEBIAN, "Debian" },
+     { DISTRO_FREEBSD, "FreeBSD" },
+     { DISTRO_ESX, "VMware ESX" },
++    { DISTRO_MARINER, "Mariner"},
++    { DISTRO_VMWARE_PHOTON, "Photon"},
+ };
+ 
+ DistroType DJGetDistroFromString(const char *str)
+@@ -624,7 +626,7 @@
+ {
+     ArchType value;
+     const char *name;
+-} static const archList[] = 
++} static const archList[] =
+ {
+     { ARCH_X86_32, "x86_32" },
+     { ARCH_X86_32, "i386" },
+@@ -678,7 +680,7 @@
+     )
+ {
+     FILE *versionFile = NULL;
+-    PSTR line = NULL; 
++    PSTR line = NULL;
+     BOOLEAN isEndOfFile = FALSE;
+     DWORD ceError = ERROR_SUCCESS;
+     BOOLEAN bIsEnterprise = FALSE;
+@@ -760,7 +762,7 @@
+     _version = NULL;
+     _build = NULL;
+     _revision = NULL;
+-    
++
+ cleanup:
+ 
+     CTSafeCloseFile(&versionFile);
+--- domainjoin/libdomainjoin/src/djpamconf.c	2018-12-12 17:37:19.000000000 -0800
++++ domainjoin/libdomainjoin/src/djpamconf.c.1	2021-02-08 23:31:03.101176284 -0800
+@@ -12,7 +12,7 @@
+  * your option) any later version.
+  *
+  * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
+  * General Public License for more details.  You should have received a copy
+  * of the GNU Lesser General Public License along with this program.  If
+@@ -2449,7 +2449,7 @@
+                 LW_CLEANUP_CTERR(exc, AddOption(conf, line, "try_first_pass"));
+             }
+ 
+-            if (distro->distro == DISTRO_VMWARE_PHOTON)
++            if (distro->distro == DISTRO_VMWARE_PHOTON || distro->distro == DISTRO_MARINER)
+             {
+                 LW_CLEANUP_CTERR(exc, AddOption(conf, line, "unknown_ok"));
+             }
+@@ -3307,7 +3307,7 @@
+         }
+         if(!strcmp(services[i], "system-auth"))
+         {
+-            if (distro.distro != DISTRO_VMWARE_PHOTON)
++            if (distro.distro != DISTRO_VMWARE_PHOTON || distro.distro != DISTRO_MARINER)
+             {
+                 /* Centos uses system-auth only as an include file. We should
+                  * not directly try to enable lsass for this entry point because
+@@ -3318,16 +3318,12 @@
+                 continue;
+             }
+         }
+-        else
++        else if ((distro.distro == DISTRO_VMWARE_PHOTON || distro.distro == DISTRO_MARINER)
++                 && strcmp(services[i], "system-account") != 0)
+         {
+-            if (distro.distro == DISTRO_VMWARE_PHOTON &&
+-                strcmp(services[i], "system-account") != 0)
+-            {
+-                /* For Photon only update system-auth and system-account.
+-                 */
+-                DJ_LOG_INFO("Ignoring pam service %s", services[i]);
+-                continue;
+-            }
++            // For Photon and Mariner: only update system-auth and system-account.
++            DJ_LOG_INFO("Ignoring pam service %s", services[i]);
++            continue;
+         }
+         if(!strcmp(services[i], "systemd-user"))
+         {

@@ -1,0 +1,13 @@
+diff --git a/dcerpc/rpcd/rpcd.c b/dcerpc/rpcd/rpcd.c
+index b6c70397f..7d509aeb8 100644
+--- a/dcerpc/rpcd/rpcd.c
++++ b/dcerpc/rpcd/rpcd.c
+@@ -733,7 +733,7 @@ MatchProgramToPID(
+ error:
+ 
+     if (pFile)
+-        fclose(pFile);
++        pclose(pFile);
+ 
+     return ceError;
+ }
