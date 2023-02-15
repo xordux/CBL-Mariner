@@ -1,7 +1,7 @@
 Summary:        initramfs
 Name:           initramfs
 Version:        2.0
-Release:        9%{?dist}
+Release:        10%{?dist}
 License:        Apache License
 Vendor:         Microsoft Corporation
 Distribution:   Mariner
@@ -88,15 +88,17 @@ echo "initramfs (re)generation" %* >&2
 cat > /dev/null \
 if [ -f %{_localstatedir}/lib/rpm-state/initramfs/regenerate ]; then \
     echo "(re)generate initramfs for all kernels," %* >&2 \
-    mkinitrd -q \
+    mkinitrd --preload megaraid_sas --preload megaraid -q \
     mv /boot/initrd.img-*mshv* /boot/efi/ \
 elif [ -d %{_localstatedir}/lib/rpm-state/initramfs/pending ]; then \
     for k in `ls %{_localstatedir}/lib/rpm-state/initramfs/pending/`; do \
         echo "(re)generate initramfs for $k," %* >&2 \
         if [[ $k == *mshv* ]]; then \
-            mkinitrd -q /boot/efi/initrd.img-$k $k -k \
+            mkinitrd --preload megaraid_sas --preload megaraid -q \
+                /boot/efi/initrd.img-$k $k -k \
         else \
-            mkinitrd -q /boot/initrd.img-$k $k -k \
+            mkinitrd --preload megaraid_sas --preload megaraid -q \
+                /boot/initrd.img-$k $k -k \
         fi \
     done; \
 fi \
@@ -136,6 +138,9 @@ echo "initramfs" %{version}-%{release} "postun" >&2
 %dir %{_localstatedir}/lib/initramfs/kernel
 
 %changelog
+* Mon Jan 09 2023 Vince Perri <viperri@microsoft.com> - 2.0-10
+- Add megaraid* drivers to the initramfs generated images.
+
 * Mon Dec 12 2022 Neha Agarwal <nehaagarwal@microsoft.com> - 2.0-9
 - Create initrd in /boot/efi for kernel-mshv.
 - License verified.
