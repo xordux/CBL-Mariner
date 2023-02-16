@@ -1,11 +1,14 @@
-Summary:        OpenMAX Integration Layer
-Name:           libomxil-bellagio
-Version:        0.9.3
-Release:        29%{?dist}
-License:        LGPLv2+
 Vendor:         Microsoft Corporation
 Distribution:   Mariner
-URL:            https://omxil.sourceforge.net
+%define _legacy_common_support 1
+
+Name:           libomxil-bellagio
+Version:        0.9.3
+Release:        28%{?dist}
+Summary:        OpenMAX Integration Layer
+
+License:        LGPLv2+
+URL:            http://omxil.sourceforge.net
 Source0:        http://downloads.sourceforge.net/omxil/%{name}-%{version}.tar.gz
 #https://sourceforge.net/tracker/?func=detail&aid=3477869&group_id=160680&atid=816817
 Patch0:         libomxil-bellagio-0.9.3-fix_Werror.patch
@@ -18,11 +21,11 @@ Patch5:         http://git.buildroot.net/buildroot/plain/package/multimedia/bell
 Patch6:         omxil_version.patch
 Patch7:         libomxil-bellagio-0.9.3-memcpy.patch
 Patch8:         libomxil-bellagio-0.9.3-valgrind_register.patch
-%define         _legacy_common_support 1
 BuildRequires:  doxygen
-BuildRequires:  gcc-c++
 BuildRequires:  libtool
-BuildRequires:  make
+BuildRequires:  gcc-c++
+BuildRequires: make
+
 
 %description
 The OpenMAX IL API defines a standardized media component interface to
@@ -32,6 +35,7 @@ with multimedia codecs implemented in hardware or software.
 The libomxil shared library implements the OpenMAX IL Core functionalities.
 Three dynamically loadable components are also included: OMX alsa sink
 component, OMX mp3,aac,ogg decoder component and OMX volume control component.
+
 
 %package        devel
 Summary:        Development files for %{name}
@@ -48,6 +52,7 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description    test
 The %{name}-test package contains binaries for testing %{name}.
 
+
 %prep
 %setup -q
 %patch0 -p1 -b .fix_werror
@@ -56,9 +61,9 @@ The %{name}-test package contains binaries for testing %{name}.
 %patch3 -p1 -b .dynl
 %patch4 -p1 -b .pb
 %patch5 -p1 -b .sf
-%patch6  -b .orig
+%patch6 -p0 -b .orig
 %patch7 -p1 -b .memcpy
-%patch8  -b .register
+%patch8 -p0 -b .register
 sed -i -e 's/ -Werror//' configure.ac
 autoreconf -vif
 
@@ -76,22 +81,22 @@ make %{?_smp_mflags} || make %{?_smp_mflags}
 #Build the tests files so they can be installed later
 ln -sf src bellagio
 make check LDFLAGS="-L$PWD/src/.libs" \
-    CFLAGS="%{optflags} -I$PWD/include -I$PWD"
+    CFLAGS="$RPM_OPT_FLAGS -I$PWD/include -I$PWD"
 
 
 %install
 %make_install
-find %{buildroot} -type f -name "*.la" -delete -print
+find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 
 
 #Manually install test binaries
-mkdir -p %{buildroot}%{_bindir}
+mkdir -p $RPM_BUILD_ROOT%{_bindir}
 for f in audio_effects/.libs/{omxaudiomixertest,omxvolcontroltest} resource_manager/.libs/{omxprioritytest,omxrmtest} ; do
-  install -pm 0755 test/components/${f} %{buildroot}%{_bindir}
+  install -pm 0755 test/components/${f} $RPM_BUILD_ROOT%{_bindir}
 done
 
 #Avoid docdir
-rm -rf %{buildroot}%{_docdir}/%{name}
+rm -rf $RPM_BUILD_ROOT%{_datadir}/doc/%{name}
 
 
 %ldconfig_scriptlets
@@ -119,11 +124,8 @@ rm -rf %{buildroot}%{_docdir}/%{name}
 %{_bindir}/omxrmtest
 %{_bindir}/omxvolcontroltest
 
-%changelog
-* Thu Jan 05 2023 Suresh Thelkar <sthelkar@microsoft.com> - 0.9.3-29
-- Initial CBL-Mariner import from Fedora 36 (license: MIT)
-- License verified
 
+%changelog
 * Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.3-28
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
@@ -221,37 +223,27 @@ rm -rf %{buildroot}%{_docdir}/%{name}
 
 * Wed Sep 17 2008 Giulio Urlini
 - added jpeg encoder/decoder
-
 * Mon Jul 07 2008 Giulio Urlini
 - added clock source, video source, camera, frame buffer writer
-
 * Thu Mar 06 2008 Marc-Andre Lureau
 - copy&pasted some good practices from some other .spec.in
 - changed components directory
 - remove unnecessary plugins .la and .a files
 - untested
-
 * Wed Feb 27 2008 Giulio Urlini
 - changed the library list.
-
 * Fri Oct 19 2007 Giulio Urlini
 - removed fbdev from file list. It is experimental,
   and not installed on any platform
-
 * Mon Oct 01 2007 Giulio Urlini
 - Minor update and name change of this file
-
 * Mon Jun 04 2007 Giulio Urlini
 - Bellagio 0.3.2 release
-
 * Tue May 22 2007 Giulio Urlini
 - Bellagio 0.3.1 release
-
 * Fri Apr 06 2007 Giulio Urlini
 - Bellagio 0.3 release
-
 * Fri Feb 24 2006 David Siorpaes
 - Fixed some minor issues in build process
-
 * Mon Feb 6 2006 Giulio Urlini
 - First build attempt
